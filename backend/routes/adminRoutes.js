@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const protect = require("../middlewares/protect");
 const authorizeRoles = require("../middlewares/authorizeRoles");
-const User = require("../models/User"); // ✅ ADD THIS LINE
+const User = require("../models/User");
 
 // ✅ Admin-only dashboard
 router.get("/dashboard", protect, authorizeRoles("admin"), (req, res) => {
@@ -10,14 +10,9 @@ router.get("/dashboard", protect, authorizeRoles("admin"), (req, res) => {
 });
 
 // ✅ Accessible by both admin and student
-router.get(
-  "/general",
-  protect,
-  authorizeRoles("admin", "student"),
-  (req, res) => {
-    res.json({ message: "Accessible by all logged-in users" });
-  }
-);
+router.get("/general", protect, authorizeRoles("admin", "student"), (req, res) => {
+  res.json({ message: "Accessible by all logged-in users" });
+});
 
 // ✅ Admin: Get all users
 router.get("/users", protect, authorizeRoles("admin"), async (req, res) => {
@@ -25,115 +20,116 @@ router.get("/users", protect, authorizeRoles("admin"), async (req, res) => {
   res.json(users);
 });
 
-// 👨‍🏫 Promote Student to Admin
-router.patch(
-  "/users/:id/promote",
-  protect,
-  authorizeRoles("admin"),
-  async (req, res) => {
-    try {
-      const user = await User.findById(req.params.id);
-
-      if (!user) return res.status(404).json({ message: "User not found" });
-
-      if (user.role === "admin") {
-        return res.status(400).json({ message: "User is already an admin" });
-      }
-
-      user.role = "admin";
-      await user.save();
-
-      res.json({
-        message: "User promoted to admin",
-        user: { id: user._id, name: user.name, role: user.role },
-      });
-    } catch (err) {
-      console.error("Error promoting user:", err);
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-);
-
-// 👨‍🎓 Demote Admin to Student
-router.patch(
-  "/users/:id/demote",
-  protect,
-  authorizeRoles("admin"),
-  async (req, res) => {
-    try {
-      const user = await User.findById(req.params.id);
-
-      if (!user) return res.status(404).json({ message: "User not found" });
-
-      if (user.role === "student") {
-        return res.status(400).json({ message: "User is already a student" });
-      }
-
-      user.role = "student";
-      await user.save();
-
-      res.json({
-        message: "User demoted to student",
-        user: { id: user._id, name: user.name, role: user.role },
-      });
-    } catch (err) {
-      console.error("Error demoting user:", err);
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-);
-
-// 🧹 Delete User
-router.delete(
-  "/users/:id",
-  protect,
-  authorizeRoles("admin"),
-  async (req, res) => {
-    try {
-      const user = await User.findByIdAndDelete(req.params.id);
-
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      res.json({
-        message: "User deleted successfully",
-        user: { id: user._id, name: user.name, email: user.email },
-      });
-    } catch (err) {
-      console.error("Error deleting user:", err);
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-);
-
-// 🚫 Block a user
-router.patch(
-  "/users/:id/block",
-  protect,
-  authorizeRoles("admin"),
-  async (req, res) => {
+// 🧑‍🏫 Promote Student to Admin
+router.patch("/users/:id/promote", protect, authorizeRoles("admin"), async (req, res) => {
+  try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.role === "admin") {
+      return res.status(400).json({ message: "User is already an admin" });
+    }
+    if (user.role === "superadmin") {
+      return res.status(403).json({ message: "Cannot promote a superadmin" });
+    }
+
+    user.role = "admin";
+    await user.save();
+
+    res.json({
+      message: "User promoted to admin",
+      user: { id: user._id, name: user.name, role: user.role },
+    });
+  } catch (err) {
+    console.error("Error promoting user:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// 🧑‍🎓 Demote Admin to Student
+router.patch("/users/:id/demote", protect, authorizeRoles("admin"), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.role === "student") {
+      return res.status(400).json({ message: "User is already a student" });
+    }
+    if (user.role === "superadmin") {
+      return res.status(403).json({ message: "Cannot demote a superadmin" });
+    }
+
+    user.role = "student";
+    await user.save();
+
+    res.json({
+      message: "User demoted to student",
+      user: { id: user._id, name: user.name, role: user.role },
+    });
+  } catch (err) {
+    console.error("Error demoting user:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// 🗑️ Delete user (students only)
+router.delete("/users/:id", protect, authorizeRoles("admin"), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.role === "admin" || user.role === "superadmin") {
+      return res.status(403).json({ message: "Cannot delete another admin or superadmin" });
+    }
+
+    await user.deleteOne();
+
+    res.json({
+      message: "User deleted successfully",
+      user: { id: user._id, name: user.name, email: user.email },
+    });
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// 🚫 Block a student (cannot block admins/superadmins)
+router.patch("/users/:id/block", protect, authorizeRoles("admin"), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.role !== "student") {
+      return res.status(403).json({ message: "Only students can be blocked by admin" });
+    }
+
+    if (user.isBlocked) {
+      return res.status(400).json({ message: "User is already blocked" });
+    }
 
     user.isBlocked = true;
     await user.save();
 
     res.json({
-      message: "User blocked",
-      user: { id: user._id, name: user.name, isBlocked: true },
+      message: "User blocked successfully",
+      user: { id: user._id, name: user.name, role: user.role, isBlocked: true },
     });
+  } catch (err) {
+    console.error("Error blocking user:", err);
+    res.status(500).json({ message: "Server error" });
   }
-);
+});
 
 // ✅ Unblock a user
-router.patch(
-  "/users/:id/unblock",
-  protect,
-  authorizeRoles("admin"),
-  async (req, res) => {
+router.patch("/users/:id/unblock", protect, authorizeRoles("admin"), async (req, res) => {
+  try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user.isBlocked) {
+      return res.status(400).json({ message: "User is not blocked" });
+    }
 
     user.isBlocked = false;
     await user.save();
@@ -142,48 +138,10 @@ router.patch(
       message: "User unblocked",
       user: { id: user._id, name: user.name, isBlocked: false },
     });
+  } catch (err) {
+    console.error("Error unblocking user:", err);
+    res.status(500).json({ message: "Server error" });
   }
-);
-
-// 🚫 Block a user (Admin only, cannot block another admin)
-router.patch(
-  "/users/:id/block",
-  protect,
-  authorizeRoles("admin"),
-  async (req, res) => {
-    try {
-      const user = await User.findById(req.params.id);
-
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // ❗ Prevent blocking another admin
-      if (user.role === "admin") {
-        return res.status(403).json({ message: "Cannot block another admin" });
-      }
-
-      // ❗ Already blocked
-      if (user.isBlocked === true) {
-        return res.status(400).json({ message: "User is already blocked" });
-      }
-
-      user.isBlocked = true;
-      await user.save();
-
-      res.json({
-        message: "User blocked",
-        user: {
-          id: user._id,
-          name: user.name,
-          isBlocked: user.isBlocked,
-        },
-      });
-    } catch (err) {
-      console.error("🔴 Error blocking user:", err);
-      res.status(500).json({ message: "Server error", error: err.message });
-    }
-  }
-);
+});
 
 module.exports = router;
