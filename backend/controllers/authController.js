@@ -65,3 +65,31 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ message: 'Login failed', error: error.message });
   }
 };
+
+// delete
+exports.deleteOwnAccount = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // ❌ Superadmin cannot delete their own account
+    if (user.role === 'superadmin') {
+      return res.status(403).json({ message: 'Superadmin cannot delete their own account' });
+    }
+
+    await user.deleteOne();
+
+    res.json({
+      message: 'Your account has been deleted successfully.',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Account deletion failed', error: error.message });
+  }
+};
