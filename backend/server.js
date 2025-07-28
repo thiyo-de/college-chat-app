@@ -4,72 +4,54 @@ const { Server } = require("socket.io");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const fs = require("fs");
 const path = require("path");
 
-// Create uploads/images and uploads/pdfs folders if not exist
-const ensureUploadFolders = () => {
-  const base = path.join(__dirname, "uploads");
-  const folders = ["", "images", "pdfs", "others"];
-
-  folders.forEach(folder => {
-    const dir = path.join(base, folder);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-      console.log(`📁 Created folder: ${dir}`);
-    }
-  });
-};
-
-ensureUploadFolders(); // Call before server starts
-
-// Load env vars
+// ✅ Load environment variables
 dotenv.config();
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URL)
+// ✅ Connect to MongoDB
+mongoose
+  .connect(process.env.MONGO_URL)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ DB Error:", err));
 
 const app = express();
 const server = http.createServer(app);
 
-// Setup Socket.IO
+// ✅ Setup Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "*", // Allow frontend origin here in production
-    methods: ["GET", "POST"]
-  }
+    origin: "*", // ✅ In production, restrict to your frontend domain
+    methods: ["GET", "POST"],
+  },
 });
 
-// Middleware
+// ✅ Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); // Parse JSON bodies
 
-
-// ✅ Serve uploaded files (e.g., images, pdfs)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// API Routes
+// ✅ API Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/chatroom", require("./routes/chatRoomRoutes"));
 app.use("/api/message", require("./routes/messageRoutes"));
-app.use("/uploads", express.static("uploads"));
-app.use("/api/upload", require("./routes/uploadRoutes"));
+app.use("/api/upload", require("./routes/uploadRoutes")); // 🌩️ Cloudinary upload
 
-// ✅ Socket.IO logic
+// ❌ Remove local static folder if using Cloudinary only
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// ✅ Socket.IO Chat Logic
 io.on("connection", (socket) => {
   console.log("🔌 New user connected:", socket.id);
 
-  // Join a chat room
+  // Join chat room
   socket.on("joinRoom", ({ roomId }) => {
     socket.join(roomId);
     console.log(`📥 User joined room: ${roomId}`);
   });
 
-  // Listen for message and broadcast
+  // Handle message sending
   socket.on("sendMessage", (data) => {
     const { roomId, sender, message, file, fileType } = data;
     io.to(roomId).emit("receiveMessage", {
@@ -87,7 +69,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// Start server
+// ✅ Start Server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

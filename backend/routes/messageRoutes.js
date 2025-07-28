@@ -1,7 +1,8 @@
+// routes/messageRoutes.js
 const express = require("express");
 const router = express.Router();
 const protect = require("../middlewares/protect");
-const upload = require("../middlewares/upload");
+const upload = require("../middlewares/cloudUpload"); // ✅ Cloudinary Upload
 
 const {
   createMessage,
@@ -14,23 +15,22 @@ router.post("/", protect, createMessage);
 // 🔒 Get all messages for a specific room
 router.get("/:roomId", protect, getMessages);
 
-// 🔒 Upload file (image or PDF)
+router.get("/public", protect, (req, res) => {
+  req.params.roomId = "public";
+  return getMessages(req, res);
+});
+
+// 🔒 Upload a file (image or PDF) to Cloudinary
 router.post("/upload", protect, upload.single("file"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
+  if (!req.file || !req.file.path) {
+    return res.status(400).json({ message: "❌ No file uploaded" });
   }
 
-  // Fix: Determine actual subfolder
-  const fileType = req.file.mimetype.includes("image")
-    ? "images"
-    : req.file.mimetype.includes("pdf")
-    ? "pdfs"
-    : "";
-
-  res.json({
-    message: "File uploaded successfully",
-    fileUrl: `/uploads/${fileType}/${req.file.filename}`,
+  res.status(200).json({
+    message: "✅ File uploaded to Cloudinary",
+    fileUrl: req.file.path,
     fileType: req.file.mimetype,
+    public_id: req.file.filename,
   });
 });
 

@@ -1,11 +1,19 @@
-// routes/chatRoomRoutes.js
 const express = require("express");
 const router = express.Router();
 const protect = require("../middlewares/protect");
 const ChatRoom = require("../models/ChatRoom");
 
-// ✅ Create a new chat room
-router.post("/", protect, async (req, res) => {
+// Middleware to allow only admin or superadmin
+function adminOnly(req, res, next) {
+  if (req.user && (req.user.role === "admin" || req.user.role === "superadmin")) {
+    next();
+  } else {
+    return res.status(403).json({ message: "Access denied: Admins only" });
+  }
+}
+
+// ✅ Create a new chat room — admin/superadmin only
+router.post("/", protect, adminOnly, async (req, res) => {
   const { name, description } = req.body;
 
   try {
@@ -26,7 +34,7 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
-// ✅ Get all chat rooms
+// ✅ Get all chat rooms — accessible to any authenticated user
 router.get("/", protect, async (req, res) => {
   try {
     const rooms = await ChatRoom.find();
@@ -36,16 +44,50 @@ router.get("/", protect, async (req, res) => {
   }
 });
 
-// ✅ Join a room (optional if you're managing joins from socket.io)
+// ✅ Join a room (optional, accessible to authenticated users)
 router.post("/:id/join", protect, async (req, res) => {
   try {
     const room = await ChatRoom.findById(req.params.id);
     if (!room) return res.status(404).json({ message: "Room not found" });
 
-    // In a real app, you might store joined users
+    // Implement join logic if you store joined users somewhere
     res.json({ message: `Joined room ${room.name}` });
   } catch (err) {
     res.status(500).json({ message: "Join failed", error: err.message });
+  }
+});
+
+// ✅ Update chat room (admin/superadmin only) — e.g. change name, description
+router.put("/:id", protect, adminOnly, async (req, res) => {
+  try {
+    const { name, description } = req.body;
+    const room = await ChatRoom.findById(req.params.id);
+
+    if (!room) return res.status(404).json({ message: "Room not found" });
+
+    if (name) room.name = name;
+    if (description) room.description = description;
+
+    await room.save();
+
+    res.json({ message: "Room updated", room });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update room", error: err.message });
+  }
+});
+
+// ✅ Delete chat room (admin/superadmin only)
+router.delete("/:id", protect, adminOnly, async (req, res) => {
+  try {
+    const room = await ChatRoom.findById(req.params.id);
+
+    if (!room) return res.status(404).json({ message: "Room not found" });
+
+    await room.deleteOne();
+
+    res.json({ message: "Room deleted" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete room", error: err.message });
   }
 });
 

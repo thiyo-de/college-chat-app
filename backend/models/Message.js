@@ -10,14 +10,14 @@ const messageSchema = new mongoose.Schema(
     receiver: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      default: null // null if public room chat
+      default: null // filled only for private 1-1
     },
     content: {
       type: String,
       trim: true
     },
     file: {
-      type: String // URL or filename for image/pdf
+      type: String // Cloudinary file URL
     },
     fileType: {
       type: String,
@@ -26,16 +26,16 @@ const messageSchema = new mongoose.Schema(
     },
     isPublic: {
       type: Boolean,
-      default: false
+      default: false // true if it's a public group message
     },
     roomId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'ChatRoom',
-      default: null // Only if it's a room-based message
+      default: null // used if message belongs to a custom room
     }
   },
   {
-    timestamps: true // adds createdAt & updatedAt
+    timestamps: true // auto adds createdAt, updatedAt
   }
 );
 
