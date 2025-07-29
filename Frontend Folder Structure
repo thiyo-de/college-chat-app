@@ -1,0 +1,14 @@
+college-chat-app/
+│
+└── frontend/
+    ├── public/
+    ├── src/
+    │   ├── assets/              # Icons, images, etc.
+    │   ├── components/          # Reusable UI components (ChatInput, MessageItem, etc.)
+    │   ├── pages/               # Page-level components (ChatPage.jsx)
+    │   ├── services/            # Socket.IO client, API calls, etc.
+    │   ├── utils/               # Utility functions (formatting, etc.)
+    │   ├── App.jsx
+    │   ├── main.jsx
+    │   └── index.css
+    └── vite.config.js

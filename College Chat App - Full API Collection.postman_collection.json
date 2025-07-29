@@ -1,0 +1,289 @@
+{
+	"info": {
+		"_postman_id": "cec3ed75-b928-4e70-95e5-f1f1e6d7e126",
+		"name": "College Chat App - Full API Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "47068074",
+		"_collection_link": "https://telecoms-saganist-46191596-9313963.postman.co/workspace/Thiyo-Masculine's-Workspace~9b63ccf2-9312-46fc-84a8-942ef3552ba8/collection/47068074-cec3ed75-b928-4e70-95e5-f1f1e6d7e126?action=share&source=collection_link&creator=47068074"
+	},
+	"item": [
+		{
+			"name": "Auth - Register",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"babu\", \"email\": \"babau@example.com\", \"password\": \"yourpassword\"}"
+				},
+				"url": "http://localhost:5000/api/auth/register"
+			},
+			"response": []
+		},
+		{
+			"name": "Auth - Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"email\": \"superadmin@example.com\", \"password\": \"supersecret\"}"
+				},
+				"url": "http://localhost:5000/api/auth/login"
+			},
+			"response": []
+		},
+		{
+			"name": "User - Profile",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODg0ZDM3YTBkMGE3N2Q5NzcxYmNkMSIsImlhdCI6MTc1Mzc2MzE1NiwiZXhwIjoxNzU0MzY3OTU2fQ.MHbxXIenWf45E--zWzw6iehLoFJW-NavyUDQdVx5Kc4"
+					}
+				],
+				"url": "http://localhost:5000/api/user/68884d37a0d0a77d9771bcd1"
+			},
+			"response": []
+		},
+		{
+			"name": "Admin - Get All Users",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODIwMDBhZTc5YzYxYjM2ZjI4OTlmNiIsImlhdCI6MTc1Mzc2MzIzNCwiZXhwIjoxNzU0MzY4MDM0fQ.aVNxxy35Fjw1lKkEMwCsX9vpWki56KhU4jVVITtt0WU"
+					}
+				],
+				"url": "http://localhost:5000/api/admin/users"
+			},
+			"response": []
+		},
+		{
+			"name": "Messages - Create Message (Public)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODIwMDBhZTc5YzYxYjM2ZjI4OTlmNiIsImlhdCI6MTc1Mzc2MzIzNCwiZXhwIjoxNzU0MzY4MDM0fQ.aVNxxy35Fjw1lKkEMwCsX9vpWki56KhU4jVVITtt0WU"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"content\": \"Hello everyone!\",\r\n  \"isPublic\": true\r\n}"
+				},
+				"url": "http://localhost:5000/api/message"
+			},
+			"response": []
+		},
+		{
+			"name": "Messages - Private Chat",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODIwMDBhZTc5YzYxYjM2ZjI4OTlmNiIsImlhdCI6MTc1Mzc2MzIzNCwiZXhwIjoxNzU0MzY4MDM0fQ.aVNxxy35Fjw1lKkEMwCsX9vpWki56KhU4jVVITtt0WU"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"receiverId\": \"68884d37a0d0a77d9771bcd1\",\r\n  \"content\": \"Hey, how’s it going?\"\r\n}"
+				},
+				"url": "http://localhost:5000/api/message"
+			},
+			"response": []
+		},
+		{
+			"name": "Messages - Chat Room",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODIwMDBhZTc5YzYxYjM2ZjI4OTlmNiIsImlhdCI6MTc1Mzc2MzIzNCwiZXhwIjoxNzU0MzY4MDM0fQ.aVNxxy35Fjw1lKkEMwCsX9vpWki56KhU4jVVITtt0WU"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Maths Study Group\",\r\n  \"isPublic\": true\r\n}"
+				},
+				"url": "http://localhost:5000/api/chatroom"
+			},
+			"response": []
+		},
+		{
+			"name": "Messages - Upload File (Private)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODIwMDBhZTc5YzYxYjM2ZjI4OTlmNiIsImlhdCI6MTc1Mzc2Mzk5MywiZXhwIjoxNzU0MzY4NzkzfQ.aShy5YZEY0mgFLVAs19TXtv1eJPJFba-yL5t6o5aptQ"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": []
+						}
+					]
+				},
+				"url": "http://localhost:5000/api/message/upload"
+			},
+			"response": []
+		},
+		{
+			"name": "Messages - Upload File (Public)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/ADMIN/Downloads/New folder (6)/WhatsApp Image 2025-07-26 at 12.07.38 PM (1).jpeg"
+						}
+					]
+				},
+				"url": "http://localhost:5000/api/upload"
+			},
+			"response": []
+		},
+		{
+			"name": "Admin-only Dashboard",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODIwMDBhZTc5YzYxYjM2ZjI4OTlmNiIsImlhdCI6MTc1Mzc2MzU2NCwiZXhwIjoxNzU0MzY4MzY0fQ.NtI1Jqa2vLwtXby8TJd93uMFEJS5qOOiiFVgZZxJGhI",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:5000/api/admin/dashboard"
+			},
+			"response": []
+		},
+		{
+			"name": "Promote To Admin",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODIwMDBhZTc5YzYxYjM2ZjI4OTlmNiIsImlhdCI6MTc1Mzc2MzU2NCwiZXhwIjoxNzU0MzY4MzY0fQ.NtI1Jqa2vLwtXby8TJd93uMFEJS5qOOiiFVgZZxJGhI",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:5000/api/admin/users/68884d37a0d0a77d9771bcd1/promote"
+			},
+			"response": []
+		},
+		{
+			"name": "demote from Admin",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODIwMDBhZTc5YzYxYjM2ZjI4OTlmNiIsImlhdCI6MTc1Mzc2MzU2NCwiZXhwIjoxNzU0MzY4MzY0fQ.NtI1Jqa2vLwtXby8TJd93uMFEJS5qOOiiFVgZZxJGhI",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:5000/api/admin/users/68884d37a0d0a77d9771bcd1/demote"
+			},
+			"response": []
+		},
+		{
+			"name": "Public Access",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODIwMDBhZTc5YzYxYjM2ZjI4OTlmNiIsImlhdCI6MTc1Mzc2MzU2NCwiZXhwIjoxNzU0MzY4MzY0fQ.NtI1Jqa2vLwtXby8TJd93uMFEJS5qOOiiFVgZZxJGhI",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:5000/api/admin/general"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODIwMDBhZTc5YzYxYjM2ZjI4OTlmNiIsImlhdCI6MTc1Mzc2MzU2NCwiZXhwIjoxNzU0MzY4MzY0fQ.NtI1Jqa2vLwtXby8TJd93uMFEJS5qOOiiFVgZZxJGhI",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:5000/api/admin/users/68884d37a0d0a77d9771bcd1"
+			},
+			"response": []
+		},
+		{
+			"name": "Block User",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODIwMDBhZTc5YzYxYjM2ZjI4OTlmNiIsImlhdCI6MTc1Mzc2MzU2NCwiZXhwIjoxNzU0MzY4MzY0fQ.NtI1Jqa2vLwtXby8TJd93uMFEJS5qOOiiFVgZZxJGhI",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:5000/api/admin/users/68834ccaab1b0a67784a99d5/block"
+			},
+			"response": []
+		},
+		{
+			"name": "Un-Block User",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODIwMDBhZTc5YzYxYjM2ZjI4OTlmNiIsImlhdCI6MTc1Mzc2MzU2NCwiZXhwIjoxNzU0MzY4MzY0fQ.NtI1Jqa2vLwtXby8TJd93uMFEJS5qOOiiFVgZZxJGhI",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:5000/api/admin/users/68834ccaab1b0a67784a99d5/unblock"
+			},
+			"response": []
+		}
+	]
+}
