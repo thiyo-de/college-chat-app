@@ -15,11 +15,6 @@ router.post("/", protect, createMessage);
 // 🔒 Get all messages for a specific room
 router.get("/:roomId", protect, getMessages);
 
-router.get("/public", protect, (req, res) => {
-  req.params.roomId = "public";
-  return getMessages(req, res);
-});
-
 // 🔒 Upload a file (image or PDF) to Cloudinary
 router.post("/upload", protect, upload.single("file"), (req, res) => {
   if (!req.file || !req.file.path) {

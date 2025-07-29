@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
     enum: ["student", "admin", "superadmin"],
     default: "student",
   },
+  isBlocked: {
+    type: Boolean,
+    default: false
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);
