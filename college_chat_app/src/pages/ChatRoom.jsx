@@ -13,19 +13,19 @@ const ChatRoom = () => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    // Join public room
+    // ✅ Join public room
     socket.emit("joinRoom", { roomId: "public-room" });
 
-    // Load old public messages on mount
+    // ✅ Load old public messages from DB
     fetchPublicMessages();
 
-    // Listen for incoming messages
-    socket.on("receiveMessage", (msg) => {
+    // ✅ Listen for real-time public messages
+    socket.on("receivePublicMessage", (msg) => {
       setMessages((prev) => [...prev, msg]);
     });
 
     return () => {
-      socket.off("receiveMessage");
+      socket.off("receivePublicMessage");
     };
   }, []);
 
@@ -68,12 +68,12 @@ const ChatRoom = () => {
       sender: user._id,
       content: message,
       file: uploadedFile?.fileUrl || null,
-      fileType: uploadedFile?.fileType?.split("/")[0] || "text",
+      fileType: uploadedFile?.fileType || "text",
       isPublic: true,
       roomId: null,
     };
 
-    socket.emit("sendMessage", msgData);
+    socket.emit("sendPublicMessage", msgData);
     setMessage("");
     setFile(null);
   };
@@ -99,7 +99,7 @@ const ChatRoom = () => {
           <div key={i} style={{ marginBottom: "8px" }}>
             <strong>{msg.sender?.name || "Anonymous"}:</strong>{" "}
             {msg.file ? (
-              msg.fileType === "image" ? (
+              msg.fileType?.startsWith("image") ? (
                 <>
                   <p>{msg.content}</p>
                   <img
@@ -155,7 +155,6 @@ const ChatRoom = () => {
       />
       <input
         type="file"
-        accept="image/*"
         onChange={(e) => setFile(e.target.files[0])}
         style={{ marginRight: "10px" }}
       />

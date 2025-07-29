@@ -20,8 +20,7 @@ const messageSchema = new mongoose.Schema(
       type: String // Cloudinary file URL
     },
     fileType: {
-      type: String,
-      enum: ['text', 'image', 'pdf', 'video', 'audio'],
+      type: String, // ✅ now accepts any string (no enum)
       default: 'text'
     },
     isPublic: {
