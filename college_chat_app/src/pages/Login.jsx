@@ -21,7 +21,7 @@ const Login = () => {
 
       // ✅ Save full user object (name, email, token)
       const userData = {
-        _id: res.data.user._id, // or user._id depending on backend
+        _id: res.data.user.id, // or user._id depending on backend
         name: res.data.user.name,
         email: res.data.user.email,
         token: res.data.token,

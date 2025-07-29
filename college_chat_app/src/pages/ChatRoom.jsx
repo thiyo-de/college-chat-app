@@ -1,64 +1,81 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
 import io from "socket.io-client";
+import API from "../utils/api";
 
-const socket = io("http://localhost:5000"); // Your backend URL
+const socket = io("http://localhost:5000"); // Your backend WebSocket URL
 
 const ChatRoom = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [file, setFile] = useState(null);
   const messageEndRef = useRef(null);
 
-  // ✅ Load user from localStorage
-  const user = JSON.parse(localStorage.getItem("user")) || null;
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    // ✅ Fetch existing public messages
-    const fetchMessages = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/message/public/all");
-        setMessages(res.data);
-      } catch (err) {
-        console.error("❌ Failed to load public messages:", err);
-      }
-    };
-
-    fetchMessages();
-
-    // ✅ Join public socket room
+    // Join public room
     socket.emit("joinRoom", { roomId: "public-room" });
 
-    // ✅ Listen for real-time messages
+    // Load old public messages on mount
+    fetchPublicMessages();
+
+    // Listen for incoming messages
     socket.on("receiveMessage", (msg) => {
       setMessages((prev) => [...prev, msg]);
     });
 
-    // ❌ Cleanup only listener
     return () => {
       socket.off("receiveMessage");
     };
   }, []);
 
-  // ✅ Scroll to bottom on new message
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = () => {
-    if (!message.trim()) return;
+  const fetchPublicMessages = async () => {
+    try {
+      const res = await API.get("/message/public/all");
+      setMessages(res.data);
+    } catch (err) {
+      console.error("❌ Failed to load messages", err);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!message.trim() && !file) return;
     if (!user?._id) return alert("User not logged in.");
 
+    let uploadedFile = null;
+
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await API.post("/message/upload", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        uploadedFile = res.data;
+      } catch (err) {
+        alert("❌ File upload failed");
+        console.error(err);
+        return;
+      }
+    }
+
     const msgData = {
-      sender: user._id,         // ⬅️ Must be ObjectId
+      sender: user._id,
       content: message,
-      file: null,
-      fileType: "text",
+      file: uploadedFile?.fileUrl || null,
+      fileType: uploadedFile?.fileType?.split("/")[0] || "text",
       isPublic: true,
       roomId: null,
     };
 
     socket.emit("sendMessage", msgData);
     setMessage("");
+    setFile(null);
   };
 
   const handleKeyDown = (e) => {
@@ -66,8 +83,8 @@ const ChatRoom = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>🌐 Public Chat Room</h2>
+    <div>
+      <h2>🟢 Public Chat Room</h2>
 
       <div
         style={{
@@ -76,13 +93,53 @@ const ChatRoom = () => {
           overflowY: "auto",
           padding: "10px",
           marginBottom: "10px",
-          background: "#f9f9f9",
-          borderRadius: "8px",
         }}
       >
         {messages.map((msg, i) => (
           <div key={i} style={{ marginBottom: "8px" }}>
-            <strong>{msg.sender?.name || "Anonymous"}:</strong> {msg.content}
+            <strong>{msg.sender?.name || "Anonymous"}:</strong>{" "}
+            {msg.file ? (
+              msg.fileType === "image" ? (
+                <>
+                  <p>{msg.content}</p>
+                  <img
+                    src={msg.file}
+                    alt="uploaded"
+                    style={{
+                      maxHeight: "120px",
+                      display: "block",
+                      marginTop: "5px",
+                    }}
+                  />
+                </>
+              ) : msg.fileType === "application/pdf" ? (
+                <>
+                  <p>{msg.content}</p>
+                  <a
+                    href={msg.file}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    📄 Download PDF
+                  </a>
+                </>
+              ) : (
+                <>
+                  <p>{msg.content}</p>
+                  <a
+                    href={msg.file}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    📎 Download File
+                  </a>
+                </>
+              )
+            ) : (
+              <p>{msg.content}</p>
+            )}
           </div>
         ))}
         <div ref={messageEndRef} />
@@ -94,17 +151,15 @@ const ChatRoom = () => {
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Type your message..."
-        style={{
-          width: "80%",
-          padding: "8px",
-          marginRight: "10px",
-          borderRadius: "4px",
-          border: "1px solid #ccc",
-        }}
+        style={{ width: "50%", marginRight: "10px" }}
       />
-      <button onClick={handleSend} style={{ padding: "8px 16px" }}>
-        Send
-      </button>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setFile(e.target.files[0])}
+        style={{ marginRight: "10px" }}
+      />
+      <button onClick={handleSend}>Send</button>
     </div>
   );
 };
